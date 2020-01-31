@@ -8,14 +8,13 @@
 
 MAX30105 particleSensor;
 
-const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
+const byte RATE_SIZE = 8; //Increase this for more averaging. 4 is good.
 byte rates[RATE_SIZE]; //Array of heart rates
 byte rateSpot = 0;
 
 long lastBeat = 0; //Time at which the last beat occurred
 float beatsPerMinute;
 int beatAvg;
-long lastLoop = 0;
 bool fingerFound = false;
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -25,7 +24,7 @@ bool fingerFound = false;
 Adafruit_SSD1306 oled (SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 static const unsigned char PROGMEM logo2_bmp[] = { 
-0x03, 0xC0, 0xF0, 0x06, 0x71, 0x8C, 0x0C, 0x1B, 0x06, 0x18, 0x0E, 0x02, 0x10, 0x0C, 0x03, 0x10,              //Logo2 and Logo3 are two bmp pictures that display on the OLED if called
+0x03, 0xC0, 0xF0, 0x06, 0x71, 0x8C, 0x0C, 0x1B, 0x06, 0x18, 0x0E, 0x02, 0x10, 0x0C, 0x03, 0x10,
 
 0x04, 0x01, 0x10, 0x04, 0x01, 0x10, 0x40, 0x01, 0x10, 0x40, 0x01, 0x10, 0xC0, 0x03, 0x08, 0x88,
 
@@ -36,7 +35,8 @@ static const unsigned char PROGMEM logo2_bmp[] = {
 void setup() {
   oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); //Start the OLED display
   oled.display();
-  //delay(3000);
+  delay(1000);
+
   Serial.begin(115200);
   Serial.println("Initializing...");
 
@@ -50,72 +50,67 @@ void setup() {
   particleSensor.setup(); //Configure sensor with default settings
   particleSensor.setPulseAmplitudeRed(0x0A); //Turn Red LED to low to indicate sensor is running
   particleSensor.setPulseAmplitudeGreen(0); //Turn off Green LED
-
+  displayFingerOff(); // display the finger query screen upon start up
 }
 
-// todo: only call display functions when change in BMP && finger on
+// display the BPM and a pretty logo
 void displayFingerOn() {
   oled.clearDisplay();                                   
   oled.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
-  
   oled.setTextSize(2);                                   
   oled.setTextColor(WHITE); 
   oled.setCursor(50,0);                
-  oled.println("BPM");             
-  
+  oled.println("BPM");               
   oled.setCursor(50,18);                
-  oled.println(beatAvg);
-  
+  oled.println(beatAvg);  
   oled.display();
   return;
 }
 
-// todo: only call display functions when finger goes from resting to off
+// query the user to place their finger
 void displayFingerOff() {
   oled.clearDisplay();                                   
   oled.setTextSize(2);                                   
   oled.setTextColor(WHITE); 
   oled.setCursor(0,0);                
-  oled.println("Finger?");             
+  oled.println("Place your finger");             
   oled.display();
   return;
 }
 
 void loop() {
   long irValue = particleSensor.getIR();   
-
+  
+  // if the user has placed their finger when it was not previously resting
   if (irValue > 7000) {
     if (!fingerFound) {
-      Serial.println("on");
       displayFingerOn();
     }
     fingerFound = true;
   }
-  else {
-    if (fingerFound) {
-      Serial.println("off");
+  else { // otherwise, signal finger removed
+    if (fingerFound) {      
       displayFingerOff();
     }
     fingerFound = false;
   }
   
-  if (checkForBeat(irValue)) {
-    //Serial.println("b");
+  if (checkForBeat(irValue)) { // check for a heart beat in the user's finger
     long delta = millis() - lastBeat;
     lastBeat = millis();
 
     beatsPerMinute = 60 / (delta / 1000.0);
-    if (beatsPerMinute < 255 && beatsPerMinute > 20) {
+    if (beatsPerMinute < 255 && beatsPerMinute > 20) { // filter out garbage values
       rates[rateSpot++] = (byte)beatsPerMinute; //Store this reading in the array
-      rateSpot %= RATE_SIZE; //Wrap variable
+      rateSpot %= RATE_SIZE; // Wrap variable
 
-      //Take average of readings
+      // Take average of readings
       beatAvg = 0;
       for (byte x = 0 ; x < RATE_SIZE ; x++)
         beatAvg += rates[x];
       beatAvg /= RATE_SIZE;
-      Serial.println(beatAvg);
-      displayFingerOn();
+      Serial.println(beatAvg); // output beat average to console
+      displayFingerOn(); // update the display with new value
     }
   }
 }
