@@ -64,7 +64,7 @@ void displayFingerOn() {
   oled.println("BPM");             
   
   oled.setCursor(50,18);                
-  oled.println(beatAvg); // todo: change this placeholder
+  oled.println(beatAvg);
   
   oled.display();
   return;
@@ -100,7 +100,7 @@ void loop() {
   }
   
   if (checkForBeat(irValue)) {
-    Serial.println("b");
+    //Serial.println("b");
     long delta = millis() - lastBeat;
     lastBeat = millis();
 
@@ -114,6 +114,8 @@ void loop() {
       for (byte x = 0 ; x < RATE_SIZE ; x++)
         beatAvg += rates[x];
       beatAvg /= RATE_SIZE;
+      Serial.println(beatAvg);
+      displayFingerOn();
     }
   }
 }
