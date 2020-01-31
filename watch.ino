@@ -72,7 +72,19 @@ void setup() {
 
 // todo: only call display functions when change in BMP && finger on
 void displayFingerOn() {
+  display.clearDisplay();                                   
+  display.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
   
+  display.setTextSize(2);                                   
+  display.setTextColor(WHITE); 
+  display.setCursor(50,0);                
+  display.println("BPM");             
+  /*
+  display.setCursor(50,18);                
+  display.println(beatAvg); 
+  */
+  display.display();
+  return;
 }
 
 // todo: only call display functions when finger goes from resting to off
@@ -86,12 +98,14 @@ void loop() {
   if (irValue > 7000) {
     if (!fingerFound) {
       Serial.println("User has touched the sensor");
+      displayFingerOn();
     }
     fingerFound = true;
   }
   else {
     if (fingerFound) {
       Serial.println("User has removed finger");
+      //displayFingerOff();
     }
     fingerFound = false;
   }
