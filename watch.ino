@@ -4,6 +4,7 @@
 
 #include "MAX30105.h"
 #include "heartRate.h"
+#include <stdlib.h>
 
 MAX30105 particleSensor;
 
@@ -21,7 +22,7 @@ bool fingerFound = false;
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET    -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SSD1306 oled (SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 static const unsigned char PROGMEM logo2_bmp[] = { 
 0x03, 0xC0, 0xF0, 0x06, 0x71, 0x8C, 0x0C, 0x1B, 0x06, 0x18, 0x0E, 0x02, 0x10, 0x0C, 0x03, 0x10,              //Logo2 and Logo3 are two bmp pictures that display on the OLED if called
@@ -51,8 +52,8 @@ static const unsigned char PROGMEM logo3_bmp[] =
 0x00, 0x08, 0x10, 0x00, 0x00, 0x06, 0x60, 0x00, 0x00, 0x03, 0xC0, 0x00, 0x00, 0x01, 0x80, 0x00  };
 
 void setup() {
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //Start the OLED display
-  display.display();
+  oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); //Start the OLED display
+  oled.display();
   //delay(3000);
   Serial.begin(115200);
   Serial.println("Initializing...");
@@ -72,23 +73,31 @@ void setup() {
 
 // todo: only call display functions when change in BMP && finger on
 void displayFingerOn() {
-  display.clearDisplay();                                   
-  display.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
+  oled.clearDisplay();                                   
+  oled.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
   
-  display.setTextSize(2);                                   
-  display.setTextColor(WHITE); 
-  display.setCursor(50,0);                
-  display.println("BPM");             
+  oled.setTextSize(2);                                   
+  oled.setTextColor(WHITE); 
+  oled.setCursor(50,0);                
+  oled.println("BPM");             
   
-  display.setCursor(50,18);                
-  display.println("_ph"); // todo: change this placeholder
+  oled.setCursor(50,18);                
+  oled.println("placeholder"); // todo: change this placeholder
   
-  display.display();
+  oled.display();
   return;
 }
 
 // todo: only call display functions when finger goes from resting to off
 void displayFingerOff() {
+  /*
+  oled.clearDisplay();
+  oled.setTextSize(2);
+  oled.setTextColor(WHITE);
+  oled.setCursor(0, 0);
+  oled.println("Please place your finger");
+  oled.display();
+  */
   return;
 }
 
@@ -97,7 +106,7 @@ void loop() {
 
   if (irValue > 7000) {
     if (!fingerFound) {
-      Serial.println("User has touched the sensor");
+      Serial.println("User has placed finger");
       displayFingerOn();
     }
     fingerFound = true;
