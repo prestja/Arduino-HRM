@@ -4,7 +4,6 @@
 
 #include "MAX30105.h"
 #include "heartRate.h"
-#include <stdlib.h>
 
 MAX30105 particleSensor;
 
