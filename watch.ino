@@ -90,14 +90,14 @@ void displayFingerOn() {
 
 // todo: only call display functions when finger goes from resting to off
 void displayFingerOff() {
-  /*
   oled.clearDisplay();
+  /*
   oled.setTextSize(2);
   oled.setTextColor(WHITE);
   oled.setCursor(0, 0);
   oled.println("Please place your finger");
-  oled.display();
   */
+  oled.display();
   return;
 }
 
@@ -114,7 +114,7 @@ void loop() {
   else {
     if (fingerFound) {
       Serial.println("User has removed finger");
-      //displayFingerOff();
+      displayFingerOff();
     }
     fingerFound = false;
   }
