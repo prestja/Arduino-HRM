@@ -13,7 +13,7 @@ byte rateSpot = 0;
 
 long lastBeat = 0; //Time at which the last beat occurred
 float beatsPerMinute;
-int beatAvg;
+int beatAvg = 0;
 long lastLoop = 0;
 bool fingerFound = false;
 
@@ -53,7 +53,7 @@ static const unsigned char PROGMEM logo3_bmp[] =
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //Start the OLED display
   display.display();
-  delay(3000);
+  //delay(3000);
   Serial.begin(115200);
   Serial.println("Initializing...");
 
@@ -79,17 +79,17 @@ void displayFingerOn() {
   display.setTextColor(WHITE); 
   display.setCursor(50,0);                
   display.println("BPM");             
-  /*
+  
   display.setCursor(50,18);                
-  display.println(beatAvg); 
-  */
+  display.println("_ph"); // todo: change this placeholder
+  
   display.display();
   return;
 }
 
 // todo: only call display functions when finger goes from resting to off
 void displayFingerOff() {
-
+  return;
 }
 
 void loop() {
