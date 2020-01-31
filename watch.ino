@@ -15,6 +15,7 @@ long lastBeat = 0; //Time at which the last beat occurred
 float beatsPerMinute;
 int beatAvg;
 long lastLoop = 0;
+bool fingerFound = false;
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -56,7 +57,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Initializing...");
 
-  // Initialize sensor
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
   {
     Serial.println("MAX30105 was not found. Please check wiring/power. ");
@@ -81,15 +81,23 @@ void displayFingerOff() {
 }
 
 void loop() {
-  long irValue = particleSensor.getIR(); 
-  long delta = millis() - lastLoop;
-  Serial.println(delta);
-  lastLoop = millis();
-  
+  long irValue = particleSensor.getIR();   
+
+  if (irValue > 7000) {
+    if (!fingerFound) {
+      Serial.println("User has touched the sensor");
+    }
+    fingerFound = true;
+  }
+  else {
+    if (fingerFound) {
+      Serial.println("User has removed finger");
+    }
+    fingerFound = false;
+  }
   
   if (checkForBeat(irValue)) {
     Serial.println("beat");
-    //We sensed a beat!
     long delta = millis() - lastBeat;
     lastBeat = millis();
 
@@ -105,13 +113,4 @@ void loop() {
       beatAvg /= RATE_SIZE;
     }
   }
-
-  /*
-  display.clearDisplay();
-  display.setTextSize(2);                                   
-  display.setTextColor(WHITE); 
-  display.setCursor(50,0);                
-  display.println("BPM");
-  display.display();
-  */
 }
