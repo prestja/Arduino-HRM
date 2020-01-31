@@ -90,13 +90,17 @@ void displayFingerOn() {
 
 // todo: only call display functions when finger goes from resting to off
 void displayFingerOff() {
-  oled.clearDisplay();
-  /*
-  oled.setTextSize(2);
-  oled.setTextColor(WHITE);
-  oled.setCursor(0, 0);
-  oled.println("Please place your finger");
-  */
+  oled.clearDisplay();                                   
+  oled.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
+  
+  oled.setTextSize(2);                                   
+  oled.setTextColor(WHITE); 
+  oled.setCursor(50,0);                
+  oled.println("OFF");             
+  
+  oled.setCursor(50,18);                
+  oled.println("placeholder"); // todo: change this placeholder
+  
   oled.display();
   return;
 }
@@ -106,14 +110,14 @@ void loop() {
 
   if (irValue > 7000) {
     if (!fingerFound) {
-      Serial.println("User has placed finger");
+      Serial.println("on");
       displayFingerOn();
     }
     fingerFound = true;
   }
   else {
     if (fingerFound) {
-      Serial.println("User has removed finger");
+      Serial.println("off");
       displayFingerOff();
     }
     fingerFound = false;
